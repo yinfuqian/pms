@@ -2,7 +2,7 @@
   <div class="common-layout">
     <el-container>
       <!--      侧边-->
-      <el-aside width="200px">
+      <el-aside width="170px">
         <el-menu>
           <template v-for="item in items">
             <el-sub-menu v-if="item.subItems && item.subItems.length>0" :key="item.id" :index="item.path || ''">
@@ -85,7 +85,7 @@ export default {
       },
       {
         id: 3,
-        path: "user_list",
+        path: "users",
         title: "用户管理",
         icon: User,
       },

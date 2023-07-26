@@ -3,7 +3,7 @@
     <!-- 面包屑导航 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="'/home'">首页</el-breadcrumb-item>
-      <el-breadcrumb-item :to="'/user_list'">用户管理</el-breadcrumb-item>
+      <el-breadcrumb-item :to="'/users'">用户管理</el-breadcrumb-item>
       <el-breadcrumb-item>用户列表</el-breadcrumb-item>
     </el-breadcrumb>
     <el-card>
@@ -143,7 +143,7 @@
       <!--      修改用户弹窗-->
     </el-dialog>
     <!--    修改用户弹窗-->
-    <el-dialog v-model="EditDialogVisible" title="修改用户" width="50%">
+    <el-dialog v-model="editDialogVisible" title="修改用户" width="50%">
       <!-- 内容主体区 -->
       <el-form ref="editUserFormRef" :model="editUserForm" :rules="addUserFormRules" label-width="70px">
         <el-form-item label="用户名" prop="username"> <!-- prop是验证规则属性 -->
@@ -212,7 +212,7 @@
       </el-form>
       <!-- 底部区 -->
       <span slot="footer" class="dialog-footer">
-      <el-button @click="EditDialogVisible = false">取 消</el-button>
+      <el-button @click="editDialogVisible = false">取 消</el-button>
       <el-button type="primary" @click="updateUser">确 定</el-button></span>
     </el-dialog>
   </div>
@@ -338,7 +338,7 @@ export default {
     async getUserList() {
       if (this.queryInfo.query !== "") {
         try {
-          const {data: res} = await axios.get(`search_user?username=${this.queryInfo.query}`);
+          const {data: res} = await axios.get(`/user/search?username=${this.queryInfo.query}`);
           if (res.code !== 0) {
             return this.$message.error('查询失败，没有此用户')
           }
@@ -348,7 +348,7 @@ export default {
         }
       } else {
         try {
-          const {data: res} = await axios.get(`get_user?pageNum=${this.queryInfo.pageNum}&pageSize=${this.queryInfo.pageSize}`);
+          const {data: res} = await axios.get(`user/get?pageNum=${this.queryInfo.pageNum}&pageSize=${this.queryInfo.pageSize}`);
           if (res.code !== 0) {
             return this.$message.error('获取用户列表失败')
           }
@@ -362,11 +362,10 @@ export default {
     //展示编辑用户的对话框
     async showEditDialog(username) {
       try {
-        const response = await axios.get(`search_user?username=${username}`);
+        const response = await axios.get(`user/search?username=${username}`);
         const res = response.data;
-
         if (res && res.code === 0 && res.users && res.users.length > 0) {
-          this.EditDialogVisible = true;
+          this.editDialogVisible = true;
           this.editUserForm = res.users[0];
           //console.log(this.editUserForm);
         } else {
@@ -390,7 +389,7 @@ export default {
         formData.append('password', this.addUserForm.password);
         formData.append('useremail', this.addUserForm.useremail);
         formData.append('userphonenum', this.addUserForm.userphonenum);
-        const {data: res} = await axios.post("create_user", formData, {
+        const {data: res} = await axios.post("/user/create", formData, {
           headers: {
             'Content-Type': 'multipart/form-data' // 设置请求的 Content-Type
           }
@@ -420,7 +419,7 @@ export default {
         formData.append('password', this.editUserForm.password);
         formData.append('useremail', this.editUserForm.useremail);
         formData.append('userphonenum', this.editUserForm.userphonenum);
-        const {data: res} = await axios.put(`update_user/${this.editUserForm.id}`, formData, {
+        const {data: res} = await axios.put(`/user/update/${this.editUserForm.id}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data' // 设置请求的 Content-Type
           }
@@ -430,7 +429,7 @@ export default {
           return;
         }
         this.$message.success("更新用户成功");
-        this.EditDialogVisible = false; // 关闭对话框
+        this.editDialogVisible = false; // 关闭对话框
         this.$refs.editUserFormRef.resetFields(); // 重置表单
         this.getUserList(); // 刷新用户列表
       } catch (error) {
@@ -438,7 +437,8 @@ export default {
       }
     },
     // 展示删除用户对话框
-    showDeleteDialog(id) {
+    showDeleteDialog(id)
+    {
       this.$confirm('确认删除该用户嘛？', '提示', {
         confirmButtonText: "确认",
         cancelButtonText: '取消',
@@ -453,7 +453,7 @@ export default {
     //删除用户
     delete_user(id) {
       try {
-        axios.delete(`delete_user/${id}`)
+        axios.delete(`user/delete/${id}`)
             .then(response => {
               const res = response.data;
               if (res.code === 0) {

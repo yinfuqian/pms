@@ -36,11 +36,11 @@ const routes = [
     },
     //用户列表
     {
-        path: '/user_list',
+        path: '/users',
         name: 'PmsUserList',
         component: PmsHome,
-        redirect: '/user_list',
-        children: [{path: '/user_list', component: PmsUserList}]
+        redirect: '/users',
+        children: [{path: '/users', component: PmsUserList}]
     },
     //产品管理
      {

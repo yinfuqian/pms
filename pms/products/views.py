@@ -30,7 +30,6 @@ def products_list(request):
     }
     return JsonResponse({"code": 0, "msg": "获取所有产品成功", "products": products_list, "pagination": data})
 
-
 # 搜索产品
 def search_product(request):
     product_name = request.GET.get('product_name')
