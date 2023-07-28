@@ -12,22 +12,35 @@ def products_list(request):
     products = PmsProductsList.objects.all()
     page_num = request.GET.get('pageNum')
     page_size = request.GET.get('pageSize')
-    start = (int(page_num) - 1) * int(page_size)
-    end = start + int(page_size)
-    page_products = products[start:end]
-    count = products.count()
-    products_list = []
-    for product in page_products:
-        products_list.append({
-            "id": product.id,
-            "code": 0,
-            "product_name": product.product_name,
-            "product_version": product.product_version,
-            "product_install_method": product.product_install_method,
-            "product_notes": product.product_notes})
-    data = {
-        'count': count,
-    }
+
+    if not page_num or not page_size:
+        products_list = []
+        for product in products:
+            products_list.append({
+                "id": product.id,
+                "code": 0,
+                "product_name": product.product_name,
+                "product_version": product.product_version,
+                "product_install_method": product.product_install_method,
+                "product_notes": product.product_notes})
+        data = len(products_list)
+    else:
+        start = (int(page_num) - 1) * int(page_size)
+        end = start + int(page_size)
+        page_products = products[start:end]
+        count = products.count()
+        products_list = []
+        for product in page_products:
+            products_list.append({
+                "id": product.id,
+                "code": 0,
+                "product_name": product.product_name,
+                "product_version": product.product_version,
+                "product_install_method": product.product_install_method,
+                "product_notes": product.product_notes})
+        data = {
+            'count': count,
+        }
     return JsonResponse({"code": 0, "msg": "获取所有产品成功", "products": products_list, "pagination": data})
 
 # 搜索产品

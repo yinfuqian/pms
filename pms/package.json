@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "dayjs": "^1.11.9",
+    "dayjs-ext": "^2.2.0"
+  }
+}

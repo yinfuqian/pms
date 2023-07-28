@@ -4,6 +4,7 @@ from django.contrib import auth
 from django.http import JsonResponse
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
+
 from .models import PmsUserProfile
 
 
@@ -92,6 +93,41 @@ def search_user(request):
             'message': '用户不存在',
             'code': '1'
         }, status=404)
+
+
+# 查询所有PM
+def get_pm(request):
+    users = PmsUserProfile.objects.filter(userjob="PM")
+    user_list = []
+    for user in users:
+        user_list.append({
+            "id": user.id,
+            "code": 0,
+            "username": user.username,
+            "usernicname": user.usernicname,
+            "userjob": user.userjob,
+            "userbase": user.userbase,
+            "userworknum": user.userworknum,
+            "useremail": user.useremail,
+            "userphonenum": user.userphonenum})
+    return JsonResponse({"code": 0, "msg": "获取所有项目经理成功", "users": user_list})
+
+# 查询所有TM
+def get_tm(request):
+    users = PmsUserProfile.objects.filter(userjob="技术经理")
+    user_list = []
+    for user in users:
+        user_list.append({
+            "id": user.id,
+            "code": 0,
+            "username": user.username,
+            "usernicname": user.usernicname,
+            "userjob": user.userjob,
+            "userbase": user.userbase,
+            "userworknum": user.userworknum,
+            "useremail": user.useremail,
+            "userphonenum": user.userphonenum})
+    return JsonResponse({"code": 0, "msg": "获取所有技术经理成功", "users": user_list})
 
 
 # 查询所有用户

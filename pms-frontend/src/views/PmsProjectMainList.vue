@@ -6,7 +6,6 @@
     <el-breadcrumb-item :to="'/mainProjects'">主线</el-breadcrumb-item>
     <el-breadcrumb-item>项目列表</el-breadcrumb-item>
   </el-breadcrumb>
-
   <el-card>
     <!-- 搜索与添加区域 -->
     <div class="search-area">
@@ -52,7 +51,7 @@
       <el-table-column header-align="center" label="操作" width="150px">
         <template v-slot="scope">
           <!-- 修改按钮 -->
-          <el-button type="primary" @click="showEditDialog(scope.row.id)">
+          <el-button type="primary" @click="">
             <el-icon>
               <edit/>
             </el-icon>
@@ -80,48 +79,82 @@
     </el-config-provider>
   </el-card>
   <!-- 添加项目弹窗 -->
-    <el-dialog v-model="addDialogVisible" title="添加产品" width="50%">
-      <!-- 内容主体区 -->
-      <el-form ref="addProjectRef" :model="addProjectForm" label-width="100px">
-        <el-form-item label="项目名" prop="project_name"> <!-- prop是验证规则属性 -->
-          <el-input v-model="addProjectForm.project_name"></el-input>
-        </el-form-item>
-        <el-form-item label="项目所属区域" prop="project_base"> <!-- prop是验证规则属性 -->
-          <el-select v-model="addProjectForm.project_base" placeholder="点击选择">
+  <el-dialog v-model="addDialogVisible" title="添加产品" width="50%">
+    <!-- 内容主体区 -->
+    <el-form ref="addProjectRef" :model="addProjectForm" label-width="100px">
+      <el-form-item label="项目名" prop="project_name"> <!-- prop是验证规则属性 -->
+        <el-input v-model="addProjectForm.project_name"></el-input>
+      </el-form-item>
+      <el-form-item label="项目所属区域" prop="project_base"> <!-- prop是验证规则属性 -->
+        <el-select v-model="addProjectForm.project_base" placeholder="点击选择">
           <el-option label="北区" value="北区"/>
           <el-option label="东区" value="东区"/>
           <el-option label="南区" value="南区"/>
         </el-select>
-        </el-form-item>
-        <el-form-item label="项目编号" prop="project_num"> <!-- prop是验证规则属性 -->
-          <el-input v-model="addProjectForm.project_num"></el-input>
-        </el-form-item>
-        <el-form-item label="所属PM" prop="project_owner"> <!-- prop是验证规则属性 -->
-          <el-input v-model="addProjectForm.project_owner"></el-input>
-        </el-form-item>
-      </el-form>
-      <!-- 底部区 -->
-      <span slot="footer" class="dialog-footer">
+      </el-form-item>
+      <el-form-item label="项目编号" prop="project_num"> <!-- prop是验证规则属性 -->
+        <el-input v-model="addProjectForm.project_num"></el-input>
+      </el-form-item>
+      <el-form-item label="所属PM" prop="project_owner"> <!-- prop是验证规则属性 -->
+        <el-select v-model="addProjectForm.project_owner" placeholder="点击选择">
+          <el-option v-for="pm in pmList" :key="pm.id" :label="pm.username" :value="pm.username"/>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="负责TM" prop="project_resident"> <!-- prop是验证规则属性 -->
+        <el-select v-model="addProjectForm.project_resident" placeholder="点击选择">
+          <el-option v-for="tm in tmList" :key="tm.id" :label="tm.username" :value="tm.username"/>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="部署产品" prop="project_product"> <!-- prop是验证规则属性 -->
+        <el-select v-model="addProjectForm.project_product" placeholder="点击选择">
+          <el-option v-for="product in productList" :key="product.id"
+                     :label="product.product_name + '-'+product.product_version+'-'+product.product_install_method"
+                     :value="product.product_name"/>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="更新时间" prop="project_update_time">
+      <el-config-provider :locale="locale">
+         <el-date-picker
+      v-model="addProjectForm.project_update_time"
+      type="date"
+      placeholder="点击选择"
+      format="YYYY/MM/DD"
+        value-format="YYYY-MM-DD"
+        :locale="locale"
+   ></el-date-picker>
+        </el-config-provider>
+      </el-form-item>
+    </el-form>
+    <!-- 底部区 -->
+    <span slot="footer" class="dialog-footer">
       <el-button @click="addDialogVisible = false">取 消</el-button>
       <el-button type="primary" @click="">确 定</el-button></span>
-    </el-dialog>
+  </el-dialog>
 </template>
 
 
 <script>
+import { ref } from 'vue';
 import {MoreFilled, Search} from "@element-plus/icons-vue";
 import axios from "axios";
 import zhCn from "element-plus/lib/locale/lang/zh-cn";
-import {ElDialog} from "element-plus";
+import {ElDatePicker, ElDialog} from "element-plus";
+
+
 
 export default {
+  setup() {
+    return {
+      locale: zhCn,
+    }
+  },
   name: "PmsProjectList",
   computed: {
     zhCn() {
-      return zhCn
+      return zhCn;
     },
   },
-  components: {MoreFilled, Search, ElDialog},
+  components: {MoreFilled, Search, ElDialog, ElDatePicker},
   data() {
     return {
       //获取项目列表的参数对象
@@ -143,10 +176,24 @@ export default {
       //   product_version: [{required: true, message: '请选择项目版本', trigger: 'blur'}],
       //   product_install_method: [{required: false, message: '请选择项目部署方式', trigger: 'blur'}],
       // },
+      //存储所有PM数据
+      pmList: [],
+      //存储所有TM数据
+      tmList: [],
+      //存储所有产品数据
+      productList: [],
+      //存储时间
+      updateTime: '',
+
+
+
     }
   },
   created() {
     this.getProjectsList();
+    this.getPmList();
+    this.getTmList();
+    this.getProductList();
   },
   methods: {
     //对话框打开
@@ -179,7 +226,7 @@ export default {
     //查询所有项目 搜索项目
     async getProjectsList() {
       if (this.queryInfo.query !== "") {
-       // console.log(this.queryInfo.query)
+        // console.log(this.queryInfo.query)
         try {
           const {data: res} = await axios.get(`mainProjects/search?project_name=${this.queryInfo.query}`);
           if (res.code !== 0) {
@@ -192,21 +239,20 @@ export default {
         }
       } else {
         try {
-        const {data: res} = await axios.get(`/mainProjects/list?pageNum=${this.queryInfo.pageNum}&pageSize=${this.queryInfo.pageSize}`);
-        if (res.code !== 0) {
-          return this.$message.error('获取项目列表失败')
-        }
-        //console.log(res)
-        this.projectsList = res.projects
-        this.count = res.pagination.count
-        //console.log(this.projectsList)
-      }
-      catch (error) {
+          const {data: res} = await axios.get(`/mainProjects/list?pageNum=${this.queryInfo.pageNum}&pageSize=${this.queryInfo.pageSize}`);
+          if (res.code !== 0) {
+            return this.$message.error('获取项目列表失败')
+          }
+          //console.log(res)
+          this.projectsList = res.projects
+          this.count = res.pagination.count
+          //console.log(this.projectsList)
+        } catch (error) {
           return this.$message.error('获取项目列表失败')
         }
       }
     },
-     //创建项目
+    //创建项目
     async createProject() {
       try {
         await this.$refs.addPorjectRef.validate(); // 表单验证
@@ -230,6 +276,42 @@ export default {
         this.$message.error("表单验证失败，请检查输入");
       }
     },
+    //查询所有PM
+    async getPmList() {
+      try {
+        const {data} = await axios.get('/user/pms');
+        if (data.code != 0) {
+          return this.$message.error("获取所有PM失败");
+        }
+        this.pmList = data.users;
+      } catch (errro) {
+        this.$message.error("获取所有PM失败");
+      }
+    },
+    //查询所TM
+    async getTmList() {
+      try {
+        const {data} = await axios.get('/user/tms');
+        if (data.code != 0) {
+          return this.$message.error("获取所有TM失败");
+        }
+        this.tmList = data.users;
+      } catch (errro) {
+        this.$message.error("获取所有TM失败");
+      }
+    },
+    //查询所有产品
+    async getProductList() {
+      try {
+        const {data} = await axios.get('/products/list');
+        if (data.code != 0) {
+          return this.$message.error("获取所有产品失败");
+        }
+        this.productList = data.products;
+      } catch (errro) {
+        this.$message.error("获取所有产品失败");
+      }
+    }
   }
 }
 </script>
