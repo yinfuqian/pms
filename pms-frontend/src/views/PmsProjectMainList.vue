@@ -100,7 +100,7 @@
           <el-option v-for="pm in pmList" :key="pm.id" :label="pm.username" :value="pm.username"/>
         </el-select>
       </el-form-item>
-      <el-form-item label="负责TM" prop="project_resident"> <!-- prop是验证规则属性 -->
+      <el-form-item label="驻场TM" prop="project_resident"> <!-- prop是验证规则属性 -->
         <el-select v-model="addProjectForm.project_resident" placeholder="点击选择">
           <el-option v-for="tm in tmList" :key="tm.id" :label="tm.username" :value="tm.username"/>
         </el-select>
@@ -113,16 +113,44 @@
         </el-select>
       </el-form-item>
       <el-form-item label="更新时间" prop="project_update_time">
-      <el-config-provider :locale="locale">
-         <el-date-picker
-      v-model="addProjectForm.project_update_time"
-      type="date"
-      placeholder="点击选择"
-      format="YYYY/MM/DD"
-        value-format="YYYY-MM-DD"
-        :locale="locale"
-   ></el-date-picker>
+        <el-config-provider :locale="locale">
+          <el-date-picker
+              v-model="addProjectForm.project_update_time"
+              :locale="locale"
+              format="YYYY/MM/DD"
+              placeholder="点击选择"
+              type="date"
+              value-format="YYYY-MM-DD"
+          ></el-date-picker>
         </el-config-provider>
+      </el-form-item>
+      <el-form-item label="操作人" prop="project_resident"> <!-- prop是验证规则属性 -->
+        <el-select v-model="addProjectForm.project_update_user" placeholder="点击选择">
+          <el-option v-for="user in userList" :key="user.id" :label="user.username" :value="user.username"/>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="更新文档" prop="project_base"> <!-- prop是验证规则属性 -->
+        <el-select v-model="addProjectForm.project_base" placeholder="点击选择">
+          <el-option label="北区" value="北区"/>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="IVC版本" prop="project_ivc"> <!-- prop是验证规则属性 -->
+        <el-select v-model="addProjectForm.project_ivc" placeholder="点击选择">
+          <el-option label="追一自研" value="追一自研"/>
+          <el-option label="其他" value="其他" @click="openInputPopup('IVC')"/>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="数据库版本" prop="project_db"> <!-- prop是验证规则属性 -->
+        <el-select v-model="addProjectForm.project_db" placeholder="点击选择">
+          <el-option label="追一自研" value="追一自研"/>
+          <el-option label="其他" value="其他" @click="openInputPopup('DB')"/>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="中间件版本" prop="project_middleware"> <!-- prop是验证规则属性 -->
+        <el-select v-model="addProjectForm.project_middleware" placeholder="点击选择">
+          <el-option label="追一自研" value="追一自研"/>
+          <el-option label="其他" value="其他" @click="openInputPopup('Middleware')"/>
+        </el-select>
       </el-form-item>
     </el-form>
     <!-- 底部区 -->
@@ -132,15 +160,11 @@
   </el-dialog>
 </template>
 
-
 <script>
-import { ref } from 'vue';
 import {MoreFilled, Search} from "@element-plus/icons-vue";
 import axios from "axios";
 import zhCn from "element-plus/lib/locale/lang/zh-cn";
 import {ElDatePicker, ElDialog} from "element-plus";
-
-
 
 export default {
   setup() {
@@ -160,11 +184,13 @@ export default {
       //获取项目列表的参数对象
       queryInfo: {
         query: "",
-        pageNum: 1, // 分页默认从第一页开始
-        pageSize: 10,// 默认每页显示n条数据
+        // 分页默认从第一页开始
+        pageNum: 1,
+        // 默认每页显示n条数据
+        pageSize: 10,
       },
-      projectsList: [],      //项目列表
-      count: 0,      //总数据
+      //总数据
+      count: 0,
       addDialogVisible: false, //控制添加项目对话框的显示与隐藏
       editDialogVisible: false, //控制修改项目对话框的显示与隐藏
       DeleteDialogVisible: false,// 控制删除项目对话框的显示与隐藏
@@ -184,9 +210,10 @@ export default {
       productList: [],
       //存储时间
       updateTime: '',
-
-
-
+      //所有用户
+      userList: [],
+      //项目列表
+      projectsList: [],
     }
   },
   created() {
@@ -194,6 +221,7 @@ export default {
     this.getPmList();
     this.getTmList();
     this.getProductList();
+    this.getAllUser();
   },
   methods: {
     //对话框打开
@@ -311,11 +339,51 @@ export default {
       } catch (errro) {
         this.$message.error("获取所有产品失败");
       }
+    },
+    //查询所有用户
+    async getAllUser() {
+      try {
+        const {data} = await axios.get('/user/get');
+        if (data.code != 0) {
+          return this.$message.error("获取所有用户失败");
+        }
+        this.userList = data.users;
+      } catch (errro) {
+        this.$message.error("获取所有用户失败");
+      }
+    },
+    //打开输入弹窗
+    openInputPopup(optionType) {
+    let title = ''; // 弹窗标题
+    let valueKey = ''; // 弹窗输入值对应的属性名
+    switch (optionType) {
+      case 'IVC':
+        title = 'IVC版本';
+        valueKey = 'project_ivc';
+        break;
+      case 'DB':
+        title = '数据库版本';
+        valueKey = 'project_db';
+        break;
+      case 'Middleware':
+        title = '中间件版本';
+        valueKey = 'project_middleware';
+        break;
     }
+
+    this.$prompt(`请输入${title}`, '输入', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消'
+    }).then(({ value }) => {
+      this.addProjectForm[valueKey] = value;
+    }).catch(() => {
+      // 取消输入
+    });
+  },
+
   }
 }
 </script>
-
 
 <style scoped>
 /*全局样式*/
@@ -339,5 +407,4 @@ body
 .search-area {
   margin-bottom: 20px;
 }
-
 </style>

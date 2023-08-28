@@ -112,6 +112,7 @@ def get_pm(request):
             "userphonenum": user.userphonenum})
     return JsonResponse({"code": 0, "msg": "获取所有项目经理成功", "users": user_list})
 
+
 # 查询所有TM
 def get_tm(request):
     users = PmsUserProfile.objects.filter(userjob="技术经理")
@@ -135,26 +136,43 @@ def get_user(request):
     users = PmsUserProfile.objects.all()
     page_num = request.GET.get('pageNum')
     page_size = request.GET.get('pageSize')
-    start = (int(page_num) - 1) * int(page_size)
-    end = start + int(page_size)
-    page_users = users[start:end]
-    count = users.count()
     user_list = []
-    for user in page_users:
-        user_list.append({
-            "id": user.id,
-            "code": 0,
-            "username": user.username,
-            "usernicname": user.usernicname,
-            "userjob": user.userjob,
-            "userbase": user.userbase,
-            "userworknum": user.userworknum,
-            "useremail": user.useremail,
-            "userphonenum": user.userphonenum})
-    data = {
-        'count': count,
-    }
-    return JsonResponse({"code": 0, "msg": "获取所有用户成功", "users": user_list, "pagination": data})
+    if page_num and page_size:  # 判断是否传递了页码参数
+        start = (int(page_num) - 1) * int(page_size)
+        end = start + int(page_size)
+        page_users = users[start:end]
+        count = users.count()
+        for user in page_users:
+            user_list.append({
+                "id": user.id,
+                "code": 0,
+                "username": user.username,
+                "usernicname": user.usernicname,
+                "userjob": user.userjob,
+                "userbase": user.userbase,
+                "userworknum": user.userworknum,
+                "useremail": user.useremail,
+                "userphonenum": user.userphonenum})
+        data = {
+            'count': count,
+        }
+        return JsonResponse({"code": 0, "msg": "获取所有用户成功", "users": user_list, "pagination": data})
+    else:
+        for user in users:
+            user_list.append({
+                "id": user.id,
+                "code": 0,
+                "username": user.username,
+                "usernicname": user.usernicname,
+                "userjob": user.userjob,
+                "userbase": user.userbase,
+                "userworknum": user.userworknum,
+                "useremail": user.useremail,
+                "userphonenum": user.userphonenum
+            })
+
+        return JsonResponse({"code": 0, "msg": "获取所有用户成功", "users": user_list})
+
 
 
 @api_view(['PUT'])

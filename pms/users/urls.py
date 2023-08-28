@@ -12,4 +12,5 @@ urlpatterns = [
     path('delete/<int:user_id>', views.delete_user),
     path('pms/', views.get_pm),
     path('tms/', views.get_tm),
+    # path('users/', views.get_all),
 ]
