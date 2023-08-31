@@ -9,4 +9,5 @@ urlpatterns = [
     path('user/', include('users.urls')),
     path('products/', include('products.urls')),
     path('mainProjects/', include('mainProjects.urls')),
+    path('file/', include('upload.urls'))
 ]

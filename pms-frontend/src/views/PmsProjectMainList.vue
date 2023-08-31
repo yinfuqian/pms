@@ -40,7 +40,7 @@
       <el-table-column header-align="center" label="更多信息" width="150px">
         <template v-slot="scope">
           <div style="display: flex; justify-content: center; align-items: center;">
-            <el-button type="info" @click="">
+            <el-button type="info" @click="showMoreInfo(scope.row)">
               <el-icon>
                 <MoreFilled/>
               </el-icon>
@@ -79,9 +79,9 @@
     </el-config-provider>
   </el-card>
   <!-- 添加项目弹窗 -->
-  <el-dialog v-model="addDialogVisible" title="添加产品" width="50%">
+  <el-dialog v-model="addDialogVisible" title="添加项目" width="50%">
     <!-- 内容主体区 -->
-    <el-form ref="addProjectRef" :model="addProjectForm" label-width="100px">
+    <el-form ref="addProjectRef" :model="addProjectForm" :rules="addProjectFormRules" label-width="100px">
       <el-form-item label="项目名" prop="project_name"> <!-- prop是验证规则属性 -->
         <el-input v-model="addProjectForm.project_name"></el-input>
       </el-form-item>
@@ -109,7 +109,7 @@
         <el-select v-model="addProjectForm.project_product" placeholder="点击选择">
           <el-option v-for="product in productList" :key="product.id"
                      :label="product.product_name + '-'+product.product_version+'-'+product.product_install_method"
-                     :value="product.product_name"/>
+                     :value="product.product_name + '-'+product.product_version+'-'+product.product_install_method"/>
         </el-select>
       </el-form-item>
       <el-form-item label="更新时间" prop="project_update_time">
@@ -129,10 +129,14 @@
           <el-option v-for="user in userList" :key="user.id" :label="user.username" :value="user.username"/>
         </el-select>
       </el-form-item>
-      <el-form-item label="更新文档" prop="project_base"> <!-- prop是验证规则属性 -->
-        <el-select v-model="addProjectForm.project_base" placeholder="点击选择">
-          <el-option label="北区" value="北区"/>
-        </el-select>
+      <el-form-item label="更新文档" prop="project_update_file">
+        <el-upload
+            :auto-upload="false"
+            :on-change="handleFileChange"
+            name="file"
+        >
+          <el-button size="small" type="primary">点击上传文件</el-button>
+        </el-upload>
       </el-form-item>
       <el-form-item label="IVC版本" prop="project_ivc"> <!-- prop是验证规则属性 -->
         <el-select v-model="addProjectForm.project_ivc" placeholder="点击选择">
@@ -156,7 +160,31 @@
     <!-- 底部区 -->
     <span slot="footer" class="dialog-footer">
       <el-button @click="addDialogVisible = false">取 消</el-button>
-      <el-button type="primary" @click="">确 定</el-button></span>
+      <el-button type="primary" @click="executeUpload">确 定</el-button></span>
+  </el-dialog>
+  <!--  显示更多信息-->
+  <el-dialog v-model="showMoreDialog" title="所有信息" width="50%" >
+    <!-- 显示项目的更多信息 -->
+    <div class="more-info-dialog">
+      <p class="info-line">项目名称: {{ selectedProject.project_name }}</p>
+      <p class="info-line">项目编号: {{selectedProject.project_num}}</p>
+      <p class="info-line">项目所属区域: {{ selectedProject.project_base }}</p>
+      <p class="info-line">项目所属PM: {{selectedProject.project_owner}}</p>
+      <p class="info-line">项目驻场TM: {{selectedProject.project_resident}}</p>
+      <p class="info-line">项目部署产品(名称-版本-部署方式): {{selectedProject.project_product}}</p>
+      <p class="info-line">项目更新日期: {{selectedProject.project_update_time}}</p>
+      <p class="info-line">项目更新操作用户: {{selectedProject.project_update_user}}</p>
+       <p class="info-line">文档列表: <a href="链接地址" target="w">文件列表</a></p>
+      <p class="info-line">项目所使用IVC: {{selectedProject.project_ivc}}</p>
+      <p class="info-line">项目所使用数据库: {{selectedProject.project_db}}</p>
+      <p class="info-line">项目所使用中间件: {{selectedProject.project_middleware}}</p>
+    </div>
+    <div class="close-button-wrapper">
+       <span slot="footer" class="dialog-footer">
+    <el-button @click="showMoreDialog = false" type="info">关闭</el-button>
+  </span>
+    </div>
+
   </el-dialog>
 </template>
 
@@ -178,9 +206,12 @@ export default {
       return zhCn;
     },
   },
-  components: {MoreFilled, Search, ElDialog, ElDatePicker},
+  components: {Search, ElDialog, ElDatePicker, MoreFilled},
   data() {
     return {
+      //打开更多信息弹窗
+      showMoreDialog:false,
+      fileToUpload: null,
       //获取项目列表的参数对象
       queryInfo: {
         query: "",
@@ -195,13 +226,22 @@ export default {
       editDialogVisible: false, //控制修改项目对话框的显示与隐藏
       DeleteDialogVisible: false,// 控制删除项目对话框的显示与隐藏
       //添加项目表单数据
-      addProjectForm: {},
+      addProjectForm: {
+        project_ivc: '追一自研',         // IVC默认值
+        project_db: '追一自研',          // 数据库默认值
+        project_middleware: '追一自研',  // 中间件默认值
+      },
       //表单验证规则
-      // addProductFormRules: {
-      //   product_name: [{required: true, message: '请选择项目名字', trigger: 'blur'}],
-      //   product_version: [{required: true, message: '请选择项目版本', trigger: 'blur'}],
-      //   product_install_method: [{required: false, message: '请选择项目部署方式', trigger: 'blur'}],
-      // },
+      addProjectFormRules: {
+        project_name: [{required: true, message: '请选择项目名字', trigger: 'blur'}],
+        project_base: [{required: true, message: '请选择项目所属区域', trigger: 'blur'}],
+        project_num: [{required: true, message: '请选择项目编号', trigger: 'blur'}],
+        project_owner: [{required: true, message: '请选择项目所属PM', trigger: 'blur'}],
+        project_resident: [{required: true, message: '请选择项目驻场TM', trigger: 'blur'}],
+        project_product: [{required: true, message: '请选择项目部署产品', trigger: 'blur'}],
+        project_update_time: [{required: true, message: '请选择更新时间', trigger: 'blur'}],
+
+      },
       //存储所有PM数据
       pmList: [],
       //存储所有TM数据
@@ -214,6 +254,8 @@ export default {
       userList: [],
       //项目列表
       projectsList: [],
+      //文件上传
+      uploadDialogVisible: false,
     }
   },
   created() {
@@ -224,6 +266,11 @@ export default {
     this.getAllUser();
   },
   methods: {
+    //所有信息展示
+    showMoreInfo(project) {
+      this.selectedProject = project;
+      this.showMoreDialog = true;
+    },
     //对话框打开
     openAddDialog() {
       this.addDialogVisible = true;
@@ -250,6 +297,37 @@ export default {
     handleCurrentChange(newPage) {
       this.queryInfo.pageNum = newPage
       this.getProjectsList()
+    },
+    //打开输入弹窗
+    openInputPopup(optionType) {
+      let title = ''; // 弹窗标题
+      let valueKey = ''; // 弹窗输入值对应的属性名
+      switch (optionType) {
+        case 'IVC':
+          title = 'IVC版本';
+          valueKey = 'project_ivc';
+          break;
+        case 'DB':
+          title = '数据库版本';
+          valueKey = 'project_db';
+          break;
+        case 'Middleware':
+          title = '中间件版本';
+          valueKey = 'project_middleware';
+          break;
+      }
+      this.$prompt(`请输入${title}`, '输入', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消'
+      }).then(({value}) => {
+        this.addProjectForm[valueKey] = value;
+      }).catch(() => {
+        // 取消输入
+      });
+    },
+    // 处理文件上传变化
+    handleFileChange(file) {
+      this.fileToUpload = file.raw;
     },
     //查询所有项目 搜索项目
     async getProjectsList() {
@@ -278,30 +356,6 @@ export default {
         } catch (error) {
           return this.$message.error('获取项目列表失败')
         }
-      }
-    },
-    //创建项目
-    async createProject() {
-      try {
-        await this.$refs.addPorjectRef.validate(); // 表单验证
-        const formData = new FormData();
-        formData.append('project_name', this.addProjectForm.project_name);
-
-        const {data: res} = await axios.post("/mainProjects/create", formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data' // 设置请求的 Content-Type
-          }
-        }); // 发送创建产品的请求
-        if (res.code !== 0) {
-          this.$message.error(res.message || "创建产品失败");
-          return;
-        }
-        this.$message.success("创建产品成功");
-        this.addDialogVisible = false; // 关闭对话框
-        this.$refs.addProjectFormFef.resetFields(); // 重置表单
-        this.getProjectsList(); // 刷新产品列表
-      } catch (error) {
-        this.$message.error("表单验证失败，请检查输入");
       }
     },
     //查询所有PM
@@ -352,59 +406,94 @@ export default {
         this.$message.error("获取所有用户失败");
       }
     },
-    //打开输入弹窗
-    openInputPopup(optionType) {
-    let title = ''; // 弹窗标题
-    let valueKey = ''; // 弹窗输入值对应的属性名
-    switch (optionType) {
-      case 'IVC':
-        title = 'IVC版本';
-        valueKey = 'project_ivc';
-        break;
-      case 'DB':
-        title = '数据库版本';
-        valueKey = 'project_db';
-        break;
-      case 'Middleware':
-        title = '中间件版本';
-        valueKey = 'project_middleware';
-        break;
-    }
+    // 执行上传逻辑
+    async executeUpload() {
+      // 将项目名 project_name传递给接口
+      const formData = new FormData();
+      formData.append("project_name", this.addProjectForm.project_name);
+      //将文件放入请求体
+      if (this.fileToUpload) {
+        formData.append("file", this.fileToUpload);
+      }
+      // console.log("File to upload:", this.fileToUpload); // 输出文件信息
+      const uploadUrl = `/file/upload?project_name=${this.addProjectForm.project_name}`;
+      const headers = {
+        'Content-Type': 'multipart/form-data' // 设置请求的 Content-Type
+      };
+      //console.log(formData.get("file"))
+      try {
+        const response = await axios.post(uploadUrl, formData, {headers});
+        if (response.status === 200) {
+          // 上传成功的逻辑
+          this.addDialogVisible = false; // 关闭弹窗
+        } else {
+          console.log("上传文件失败了")
+        }
+      } catch (error) {
+        // 异常处理
+      } finally {
+        this.addDialogVisible = false; // 关闭弹窗
+      }
+      this.createProject()
+    },
+    // 创建项目
+    async createProject() {
+      try {
+        await this.$refs.addProjectRef.validate(); // 表单验证
+        const formData = new FormData();
+        formData.append('project_name', this.addProjectForm.project_name);
+        formData.append('project_base', this.addProjectForm.project_base);
+        formData.append('project_num', this.addProjectForm.project_num);
+        formData.append('project_owner', this.addProjectForm.project_owner);
+        formData.append('project_resident', this.addProjectForm.project_resident);
+        formData.append('project_product', this.addProjectForm.project_product);
+        formData.append('project_update_time', this.addProjectForm.project_update_time);
+        formData.append('project_resident', this.addProjectForm.project_resident);
+        formData.append('project_update_file', "文件列表");
+        formData.append('project_ivc', this.addProjectForm.project_ivc);
+        formData.append('project_db', this.addProjectForm.project_db);
+        formData.append('project_middleware', this.addProjectForm.project_middleware);
 
-    this.$prompt(`请输入${title}`, '输入', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消'
-    }).then(({ value }) => {
-      this.addProjectForm[valueKey] = value;
-    }).catch(() => {
-      // 取消输入
-    });
+        const {data: res} = await axios.post("/mainProjects/create", formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data' // 设置请求的 Content-Type
+          }
+        }); // 发送创建产品的请求
+        if (res.code !== 0) {
+          this.$message.error(res.message || "创建项目失败");
+          return;
+        }
+        this.$message.success("创建项目成功");
+        this.$refs.addProjectRef.resetFields(); // 重置表单
+        await this.getProjectsList(); // 刷新产品列表
+        this.addDialogVisible = false; // 关闭对话框
+      } catch (error) {
+        console.error(error)
+        this.$message.error("表单验证失败，请检查输入");
+        this.openAddDialog()
+      }
+    },
   },
-
-  }
 }
 </script>
 
 <style scoped>
-/*全局样式*/
-html
-body
-#app {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-.el-breadcrumb {
-  margin-bottom: 15px;
-  font-size: 12px;
-}
-
-.el-card {
-  box-shadow: 0 2px 1px rgba(0, 0, 0, 0.15) !important;
-}
-
 .search-area {
   margin-bottom: 20px;
+}
+
+.more-info-dialog {
+  border: 2px solid #ccc; /* 边框 */
+  background-color: rgba(0, 0, 0, 0.5); /* 暗底背景颜色 */
+  padding: 1px; /* 可选：添加内边距 */
+  color: #fff; /* 可选：设置文本颜色为白色 */
+  margin-top: -20px; /* 调整上边距 */
+}
+.info-line {
+  line-height: 1.5; /* Adjust the line height as needed */
+  margin: 8px 0; /* Add margin above and below each line */
+}
+.close-button-wrapper {
+   margin-top: 10px; /* 设置顶部间距 */
 }
 </style>

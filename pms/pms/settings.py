@@ -21,9 +21,11 @@ INSTALLED_APPS = [
     'products',
     'project_customer',
     'mainProjects',
+    'upload',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
+    'file_manager',
 ]
 
 # rest 配置
@@ -139,3 +141,11 @@ USE_TZ = False
 STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# nfs配置
+NFS_SERVER_IP = '172.16.20.153'
+NFS_SERVER_PORT = '22'
+NFS_SERVER_USERNAME = 'root'
+NFS_SERVER_PASSWORD = '1'
+NFS_SERVER_PATH = '/data/nfs/pms/'
+

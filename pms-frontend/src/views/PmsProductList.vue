@@ -363,7 +363,7 @@ export default {
       try {
         await this.$refs.editProductFormRef.validate(); // 表单验证
         const product_version = `${this.selectedMajorVersion}.${this.selectedMinorVersion}.${this.selectedPatchVersion}`;
-        console.log(product_version)
+        //console.log(product_version)
         const formData = new FormData();
         formData.append('product_name', this.editProductForm.product_name);
         formData.append('product_version', product_version);

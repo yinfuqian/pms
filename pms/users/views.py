@@ -4,7 +4,6 @@ from django.contrib import auth
 from django.http import JsonResponse
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
-
 from .models import PmsUserProfile
 
 
@@ -215,7 +214,7 @@ def update_user(request, user_id):
         print(e)
         return JsonResponse({"code": 1, "msg": "用户更新失败"})
 
-
+# 删除用户
 @api_view(['DELETE'])
 def delete_user(request, user_id):
     try:

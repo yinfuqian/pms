@@ -16,7 +16,7 @@ class PmsMainProjectsList(models.Model):
                                            default="无")
     project_update_user = models.CharField(max_length=50, verbose_name="操作人", null=True, unique=False, default="无")
     project_update_file = models.CharField(max_length=50, verbose_name="更新文档", null=True, unique=False,
-                                           default="无")
+                                           default="文件列表")
     project_ivc = models.CharField(max_length=50, verbose_name="IVC", null=True, unique=False, default="追一自研")
     project_db = models.CharField(max_length=50, verbose_name="数据库", null=True, unique=False, default="追一自研")
     project_middleware = models.CharField(max_length=50, verbose_name="中间件", null=True, unique=False,
@@ -26,3 +26,17 @@ class PmsMainProjectsList(models.Model):
         db_table = 'pms_main_projects_list'
         verbose_name = '主线项目信息'
         verbose_name_plural = verbose_name
+
+
+
+
+
+
+
+
+
+
+
+
+
+

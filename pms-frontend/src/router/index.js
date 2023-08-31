@@ -3,10 +3,11 @@ import PmsHome from '../views/PmsHome.vue';
 import PmsUserLogin from "@/views/PmsUserLogin.vue";
 import PmsHomeChart from "@/views/PmsHomeChart.vue";
 import PmsUserList from "@/views/PmsUserList.vue";
-import PmsHistory  from "@/views/PmsHistory.vue";
+import PmsHistory from "@/views/PmsHistory.vue";
 import PmsProductList from "@/views/PmsProductList.vue";
 import PmsProjectMainCustomerList from "@/views/PmsProjectCustomerList.vue";
 import PmsProjectMainList from "@/views/PmsProjectMainList.vue";
+import PmsProjectMoreInfomation from "@/views/PmsProjectMoreInfomation.vue";
 //自定义路由
 const routes = [
     //主页
@@ -43,7 +44,7 @@ const routes = [
         children: [{path: '/users', component: PmsUserList}]
     },
     //产品管理
-     {
+    {
         path: '/products',
         name: 'PmsProductList',
         component: PmsHome,
@@ -51,7 +52,7 @@ const routes = [
         children: [{path: '/products', component: PmsProductList}]
     },
     //操作历史
-     {
+    {
         path: '/history',
         name: 'PmsHistory',
         component: PmsHome,
@@ -63,7 +64,15 @@ const routes = [
         path: '/login',
         name: 'UserLogin',
         component: PmsUserLogin
-    }
+    },
+    //项目更多信息
+    // {
+    //     path: '/project_information',
+    //     name: 'PmsPorjectInformation',
+    //     component: PmsHome,
+    //     redirect: '/project_information',
+    //     children: [{path: '/project_information', component: PmsProjectMoreInfomation}]
+    // }
 ];
 
 

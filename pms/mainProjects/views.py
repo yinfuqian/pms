@@ -29,7 +29,6 @@ def projects_list(request):
             "project_product": project.project_product,
             "project_update_time": project.project_update_time,
             "project_update_user": project.project_update_user,
-            "project_update_file": project.project_update_file,
             "project_ivc": project.project_ivc,
             "project_db": project.project_db,
             "project_middleware": project.project_middleware,
@@ -105,7 +104,7 @@ def create_product(request):
     project_product = reversed.get('project_product')
     project_update_time = reversed.get('project_update_time')
     project_update_user = reversed.get('project_update_user')
-    project_update_file = reversed.get('project_update_file')
+    project_update_file = "文件列表"
     project_ivc = reversed.get('project_ivc')
     project_db = reversed.get('project_db')
     project_middleware = reversed.get('project_middleware')
@@ -117,21 +116,35 @@ def create_product(request):
         project_db = PmsMainProjectsList._meta.get_field('project_db').get_default()
     if not project_middleware:
         project_middleware = PmsMainProjectsList.meta.get_field('project_middleware'.get_default())
-    try:
-        # 检查项目是否已经存在
-        if PmsMainProjectsList.objects.filter(project_num=project_num, project_name=project_name).exists():
-            return JsonResponse({"code": 2, "msg": "该版本项目已存在，请勿重复创建"})
-        # 创建项目
-        product = PmsMainProjectsList.objects.create(project_name=project_name, project_base=project_base,
-                                                     project_num=project_num, project_owner=project_owner,
-                                                     project_resident=project_resident,
-                                                     project_product=project_product,
-                                                     project_update_time=project_update_time,
-                                                     project_update_user=project_update_user,
-                                                     project_update_file=project_update_file, project_ivc=project_ivc,
-                                                     project_db=project_db,
-                                                     project_middleware=project_middleware)
-        return JsonResponse({"code": 0, "msg": "项目创建成功"})
-    except Exception as e:
-        print(e)
-        return JsonResponse({"code": 1, "msg": "项目创建失败"})
+    # try:
+    #     # 检查项目是否已经存在
+    #     if PmsMainProjectsList.objects.filter(project_num=project_num, project_name=project_name).exists():
+    #         return JsonResponse({"code": 2, "msg": "该版本项目已存在，请勿重复创建"})
+    #     # 创建项目
+    #     project = PmsMainProjectsList.objects.create(project_name=project_name, project_base=project_base,
+    #                                                  project_num=project_num, project_owner=project_owner,
+    #                                                  project_resident=project_resident,
+    #                                                  project_product=project_product,
+    #                                                  project_update_time=project_update_time,
+    #                                                  project_update_user=project_update_user,
+    #                                                  project_update_file=project_update_file, project_ivc=project_ivc,
+    #                                                  project_db=project_db,
+    #                                                  project_middleware=project_middleware)
+    #     return JsonResponse({"code": 0, "msg": "项目创建成功"})
+    # except Exception as e:
+    #     return JsonResponse({"code": 1, "msg": "项目创建失败"})
+
+    if PmsMainProjectsList.objects.filter(project_num=project_num, project_name=project_name).exists():
+        return JsonResponse({"code": 2, "msg": "该版本项目已存在，请勿重复创建"})
+
+    project = PmsMainProjectsList.objects.create(project_name=project_name, project_base=project_base,
+                                                 project_num=project_num, project_owner=project_owner,
+                                                 project_resident=project_resident,
+                                                 project_product=project_product,
+                                                 project_update_time=project_update_time,
+                                                 project_update_user=project_update_user,
+                                                 project_update_file=project_update_file, project_ivc=project_ivc,
+                                                 project_db=project_db,
+                                                 project_middleware=project_middleware)
+    return JsonResponse({"code": 0, "msg": "项目创建成功"})
+
