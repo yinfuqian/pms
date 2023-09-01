@@ -78,7 +78,7 @@ export default {
           },
           {
             id: 22,
-            path: "project_customer",
+            path: "customerProjects",
             title: "定制化",
             icon: Coin
           }],

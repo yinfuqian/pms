@@ -29,11 +29,11 @@ const routes = [
     },
     //定制化
     {
-        path: '/project_customer',
+        path: '/customerProjects',
         name: 'PmsProjectMainCustomerList',
         component: PmsHome,
-        redirect: '/project_customer',
-        children: [{path: '/project_customer', component: PmsProjectMainCustomerList}]
+        redirect: '/customerProjects',
+        children: [{path: '/customerProjects', component: PmsProjectMainCustomerList}]
     },
     //用户列表
     {

@@ -19,7 +19,7 @@ INSTALLED_APPS = [
     'api',
     'users',
     'products',
-    'project_customer',
+    'customerProjects',
     'mainProjects',
     'upload',
     'rest_framework',
