@@ -8,4 +8,6 @@ from . import views
 
 urlpatterns = [
     path('upload', views.upload_file, name='upload_file'),
+    path('list', views.list_file, name='list_file'),
+    path('download', views.download_file, name='download_file'),
 ]

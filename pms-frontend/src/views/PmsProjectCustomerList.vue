@@ -174,7 +174,9 @@
       <p class="info-line">项目部署产品(名称-版本-部署方式): {{ selectedProject.project_product }}</p>
       <p class="info-line">项目更新日期: {{ selectedProject.project_update_time }}</p>
       <p class="info-line">项目更新操作用户: {{ selectedProject.project_update_user }}</p>
-      <p class="info-line">文档列表: <a href="链接地址" target="w">文件列表</a></p>
+      <p class="info-line">文件列表:
+        <router-link :to="{ name: 'project_type', params: { project_type: 'customers', project_name: selectedProject.project_name } }">文件列表</router-link>
+      </p>
       <p class="info-line">项目所使用IVC: {{ selectedProject.project_ivc }}</p>
       <p class="info-line">项目所使用数据库: {{ selectedProject.project_db }}</p>
       <p class="info-line">项目所使用中间件: {{ selectedProject.project_middleware }}</p>

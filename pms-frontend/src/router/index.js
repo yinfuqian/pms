@@ -7,7 +7,7 @@ import PmsHistory from "@/views/PmsHistory.vue";
 import PmsProductList from "@/views/PmsProductList.vue";
 import PmsProjectMainCustomerList from "@/views/PmsProjectCustomerList.vue";
 import PmsProjectMainList from "@/views/PmsProjectMainList.vue";
-import PmsProjectMoreInfomation from "@/views/PmsProjectMoreInfomation.vue";
+import PmsProjectFileList from "@/views/PmsProjectFileList.vue";
 //自定义路由
 const routes = [
     //主页
@@ -16,8 +16,8 @@ const routes = [
         path: '/home',
         name: 'PmsHome',
         component: PmsHome,
-        redirect: '/home_chart',
-        children: [{path: '/home_chart', component: PmsHomeChart}]
+        redirect: '/home',
+        children: [{path: '/home', component: PmsHomeChart}]
     },
     //项目管理  主线
     {
@@ -65,16 +65,14 @@ const routes = [
         name: 'UserLogin',
         component: PmsUserLogin
     },
-    //项目更多信息
-    // {
-    //     path: '/project_information',
-    //     name: 'PmsPorjectInformation',
-    //     component: PmsHome,
-    //     redirect: '/project_information',
-    //     children: [{path: '/project_information', component: PmsProjectMoreInfomation}]
-    // }
+    //文件展示
+    {
+        path: '/filelist?:project_type&:project_name',
+        name: 'project_type',
+        component: PmsProjectFileList, // 使用文件列表组件
+        props: true // 开启 props，允许通过路由参数传递给组件
+    },
 ];
-
 
 const router = createRouter({
     history: createWebHistory(),

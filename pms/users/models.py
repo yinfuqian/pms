@@ -4,17 +4,6 @@ import random
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-# BASE_CHOICE = (
-#     ("cd", "成都"),
-#     ("bj", "北京"),
-#     ("zj", "深圳"),
-#     ("sh", "上海"),
-#     ("gz", "广州"),
-#     ("nx", "宁夏"),
-#     ("xa", "西安"),
-#     ("patnership", "合作企业"),
-# )
-
 
 # 默认用户昵称,邮箱，电话
 def get_default():

@@ -15,17 +15,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework.authtoken',
     'pms',
     'api',
     'users',
     'products',
     'customerProjects',
     'mainProjects',
-    'upload',
-    'rest_framework',
-    'rest_framework.authtoken',
     'corsheaders',
-    'file_manager',
+    'fileManager',
 ]
 
 # rest 配置

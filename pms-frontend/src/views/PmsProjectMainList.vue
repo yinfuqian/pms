@@ -1,4 +1,4 @@
-<template>
+<template xmlns="http://www.w3.org/1999/html">
   <!-- 面包屑导航 -->
   <el-breadcrumb separator-class="el-icon-arrow-right">
     <el-breadcrumb-item :to="'/home'">首页</el-breadcrumb-item>
@@ -174,7 +174,10 @@
       <p class="info-line">项目部署产品(名称-版本-部署方式): {{ selectedProject.project_product }}</p>
       <p class="info-line">项目更新日期: {{ selectedProject.project_update_time }}</p>
       <p class="info-line">项目更新操作用户: {{ selectedProject.project_update_user }}</p>
-      <p class="info-line">文档列表: <a href="链接地址" target="w">文件列表</a></p>
+      <!-- 文件列表展示 -->
+      <p class="info-line">文件列表:
+        <router-link :to="{ name: 'project_type', params: { project_type: 'main', project_name: selectedProject.project_name } }">文件列表</router-link>
+      </p>
       <p class="info-line">项目所使用IVC: {{ selectedProject.project_ivc }}</p>
       <p class="info-line">项目所使用数据库: {{ selectedProject.project_db }}</p>
       <p class="info-line">项目所使用中间件: {{ selectedProject.project_middleware }}</p>
@@ -184,7 +187,6 @@
     <el-button type="info" @click="showMoreDialog = false">关闭</el-button>
   </span>
     </div>
-
   </el-dialog>
   <!--  修改项目弹窗-->
   <el-dialog v-model="editDialogVisible" title="修改项目" width="50%">
@@ -357,6 +359,7 @@ export default {
     //所有信息展示
     showMoreInfo(project) {
       this.selectedProject = project;
+      console.log(this.selectedProject)
       this.showMoreDialog = true;
     },
     //对话框打开

@@ -53,7 +53,7 @@ export default {
       this.$refs.loginFormRef.validate().then(async valid => {
         if (!valid) return;
         //true执行登录
-        axios.post('/login/', {
+        axios.post('/user/login/', {
           username:this.loginForm.username,
           password:this.loginForm.password,
         })
