@@ -207,7 +207,7 @@ export default {
       setTimeout(() => {
         echartInit();
       }, 1000); // 延迟1秒后再初始化图表
-      //setInterval(echartInit, 10000); // 每3秒调用 echartInit 函数刷新图表
+      setInterval(echartInit, 10000); // 每10秒调用 echartInit 函数刷新图表
     });
     return {
       echart,
