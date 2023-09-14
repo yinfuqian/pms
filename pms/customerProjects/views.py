@@ -12,32 +12,51 @@ def projects_list(request):
     project = PmsCustomerProjectsList.objects.all()
     page_num = request.GET.get('pageNum')
     page_size = request.GET.get('pageSize')
-    start = (int(page_num) - 1) * int(page_size)
-    end = start + int(page_size)
-    page_products = project[start:end]
-    count = project.count()
-    projects_list = []
-    for project in page_products:
-        projects_list.append({
-            "id": project.id,
-            "code": 0,
-            "project_name": project.project_name,
-            "project_base": project.project_base,
-            "project_num": project.project_num,
-            "project_owner": project.project_owner,
-            "project_resident": project.project_resident,
-            "project_product": project.project_product,
-            "project_update_time": project.project_update_time,
-            "project_update_user": project.project_update_user,
-            "project_ivc": project.project_ivc,
-            "project_db": project.project_db,
-            "project_middleware": project.project_middleware,
-        })
-    data = {
-        'count': count,
-    }
-    return JsonResponse({"code": 0, "msg": "获取所有主线项目成功", "projects": projects_list, "pagination": data})
-
+    if page_num and page_size:
+        start = (int(page_num) - 1) * int(page_size)
+        end = start + int(page_size)
+        page_products = project[start:end]
+        count = project.count()
+        projects_list = []
+        for project in page_products:
+            projects_list.append({
+                "id": project.id,
+                "code": 0,
+                "project_name": project.project_name,
+                "project_base": project.project_base,
+                "project_num": project.project_num,
+                "project_owner": project.project_owner,
+                "project_resident": project.project_resident,
+                "project_product": project.project_product,
+                "project_update_time": project.project_update_time,
+                "project_update_user": project.project_update_user,
+                "project_ivc": project.project_ivc,
+                "project_db": project.project_db,
+                "project_middleware": project.project_middleware,
+            })
+        data = {
+            'count': count,
+        }
+        return JsonResponse({"code": 0, "msg": "获取所有主线项目成功", "projects": projects_list, "pagination": data})
+    else:
+        projects_list = []
+        for project in project:
+            projects_list.append({
+                "id": project.id,
+                "code": 0,
+                "project_name": project.project_name,
+                "project_base": project.project_base,
+                "project_num": project.project_num,
+                "project_owner": project.project_owner,
+                "project_resident": project.project_resident,
+                "project_product": project.project_product,
+                "project_update_time": project.project_update_time,
+                "project_update_user": project.project_update_user,
+                "project_ivc": project.project_ivc,
+                "project_db": project.project_db,
+                "project_middleware": project.project_middleware,
+            })
+        return JsonResponse({"code": 0, "msg": "获取所有主线项目成功", "projects": projects_list})
 
 # 搜索项目
 def search_project(request):

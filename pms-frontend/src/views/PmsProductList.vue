@@ -223,6 +223,20 @@ export default {
     this.getProductsList();
   },
   methods: {
+    //操作记录
+    operationHistory(content) {
+      const username = sessionStorage.getItem("username")
+      const formData = new FormData();
+      formData.append('user', username);
+      formData.append('content',content);
+      formData.append('operation_type', "产品管理");
+      //console.log(formData.get('user'))
+      axios.post('/history/record_user_operation', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data' // 设置请求的 Content-Type
+        }
+      })
+    },
     //对话框打开
     openAddDialog() {
       this.addDialogVisible = true;
@@ -264,6 +278,7 @@ export default {
               if (res.code === 0) {
                 this.$message.success('删除产品成功');
                 this.getProductsList(); // 刷新产品列表
+                this.operationHistory("删除了一个版本的产品")
               } else {
                 this.$message.error(res.msg || '删除产品失败');
               }
@@ -283,6 +298,7 @@ export default {
         //console.log(this.queryInfo.query)
         try {
           const {data: res} = await axios.get(`products/search?product_name=${this.queryInfo.query}`);
+          console.log(res)
           if (res.code !== 0) {
             return this.$message.error('查询失败，没有此产品')
           }
@@ -328,6 +344,7 @@ export default {
       this.addDialogVisible = false; // 关闭对话框
       this.$refs.addProductFormRef.resetFields(); // 重置表单
       this.addProductForm = {};
+      this.operationHistory("创建了一个版本的产品")
       // 重置版本选择
       this.selectedMajorVersion = "";
       this.selectedMinorVersion = "";

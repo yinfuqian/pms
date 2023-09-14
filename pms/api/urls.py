@@ -10,5 +10,8 @@ urlpatterns = [
     path('products/', include('products.urls')),
     path('mainProjects/', include('mainProjects.urls')),
     path('customerProjects/', include('customerProjects.urls')),
-    path('file/', include('fileManager.urls'))
+    path('file/', include('fileManager.urls')),
+    path('history/', include('operationHistory.urls'))
 ]
+
+

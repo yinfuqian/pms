@@ -168,7 +168,6 @@ export default {
     },
     //文件下载
     getDownloadLink(fileName) {
-      console.log(this.project_type,this.project_name,fileName)
       return `/api/file/download?project_type=${this.project_type}&project_name=${this.project_name}&file_name=${fileName}`;
     },
   },
@@ -186,16 +185,13 @@ export default {
           }
           this.fileList = fileList;
           this.isLoading = false; // 加载完成
-          //console.log(fileList)
           // 预处理文件列表，提取年月日信息
           const processedFileList = fileList.map((fileName) => this.extractDateFromFileName(fileName));
-          //console.log(processedFileList)
           // 对提取后的文件列表按年月日信息排序
           processedFileList.sort((a, b) => a.date.localeCompare(b.date));
 
           // 更新组件的文件列表
           this.fileList = processedFileList.map((item) => item.fileName);
-          console.log(this.fileList)
         })
         .catch((error) => {
           console.error("请求文件列表时出错：", error);

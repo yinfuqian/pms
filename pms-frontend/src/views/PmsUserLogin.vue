@@ -6,15 +6,15 @@
           PMS项目管理系统
         </div>
         <div class="login-form">
-          <el-form :model="loginForm" :rules="rules" ref="loginFormRef">
-            <el-form-item style="margin-bottom: 30px" prop="username"> <!-- 用户名 -->
-              <el-input prefix-icon="User" placeholder="用户名" v-model="loginForm.username"></el-input>
+          <el-form ref="loginFormRef" :model="loginForm" :rules="rules">
+            <el-form-item prop="username" style="margin-bottom: 30px"> <!-- 用户名 -->
+              <el-input v-model="loginForm.username" placeholder="用户名" prefix-icon="User"></el-input>
             </el-form-item>
             <el-form-item prop="password"> <!-- 密码 -->
-              <el-input prefix-icon="Lock" placeholder="密码" v-model="loginForm.password"></el-input>
+              <el-input v-model="loginForm.password" placeholder="密码" prefix-icon="Lock"></el-input>
             </el-form-item>
             <el-form-item> <!-- 按钮 -->
-              <el-button type="primary" @click="submitLoginForm" style="margin-top: 0px;width: 100%;">登录</el-button>
+              <el-button style="margin-top: 0px;width: 100%;" type="primary" @click="submitLoginForm">登录</el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -26,8 +26,8 @@
 <script>
 import {User} from "@element-plus/icons-vue";
 import axios from "axios";
-import {defineComponent} from "vue";
 import {ElMessage} from "element-plus";
+
 export default {
   name: "PmsUserLogin",
   components: {User},
@@ -49,23 +49,49 @@ export default {
     };
   },/* 登录*/
   methods: {
+    //操作记录
+    operationHistory() {
+      const username = sessionStorage.getItem("username")
+      const formData = new FormData();
+      formData.append('user', username);
+      formData.append('content', "登陆了页面");
+      formData.append('operation_type', "用户管理");
+      axios.post('/history/record_user_operation', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data' // 设置请求的 Content-Type
+        }
+      })
+    },
     submitLoginForm() {
       this.$refs.loginFormRef.validate().then(async valid => {
         if (!valid) return;
         //true执行登录
         axios.post('/user/login/', {
-          username:this.loginForm.username,
-          password:this.loginForm.password,
+          username: this.loginForm.username,
+          password: this.loginForm.password,
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
         })
             .then((res) => {
-              console.log(res.data);
-              if(res.data.code !== 0) return ElMessage.error("登录失败！")
+              if (res.data.code !== 0) return ElMessage.error("登录失败！")
               ElMessage.success("登录成功")
+              const userInfo = {
+                username: this.loginForm.username,
+              }
+              const userInfoString = JSON.stringify(userInfo)
+              const expiresDate = new Date();
+              expiresDate.setFullYear(expiresDate.getFullYear() + 1); // 设置Cookie有效期为1年
+              document.cookie = `userInfo=${encodeURIComponent(
+                  userInfoString
+              )}; expires=${expiresDate.toUTCString()}; path=/`;
+              sessionStorage.setItem("username", this.loginForm.username)
               //存储token
-              let token =res.data.token;
-              //console.log("登录成功，token为：",token)
-              window.sessionStorage.setItem("token",res.data.token)
+              let token = res.data.token;
+              window.sessionStorage.setItem("token", token)
               this.$router.push('/home')
+              this.operationHistory()
             })
       });
     }

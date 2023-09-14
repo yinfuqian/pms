@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'mainProjects',
     'corsheaders',
     'fileManager',
+    'operationHistory',
 ]
 
 # rest 配置

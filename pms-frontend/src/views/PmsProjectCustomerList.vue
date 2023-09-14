@@ -175,7 +175,10 @@
       <p class="info-line">项目更新日期: {{ selectedProject.project_update_time }}</p>
       <p class="info-line">项目更新操作用户: {{ selectedProject.project_update_user }}</p>
       <p class="info-line">文件列表:
-        <router-link :to="{ name: 'project_type', params: { project_type: 'customers', project_name: selectedProject.project_name } }">文件列表</router-link>
+        <router-link
+            :to="{ name: 'project_type', params: { project_type: 'customers', project_name: selectedProject.project_name } }">
+          文件列表
+        </router-link>
       </p>
       <p class="info-line">项目所使用IVC: {{ selectedProject.project_ivc }}</p>
       <p class="info-line">项目所使用数据库: {{ selectedProject.project_db }}</p>
@@ -356,6 +359,21 @@ export default {
     this.getAllUser();
   },
   methods: {
+    //操作记录
+    operationHistory(content, project_name, file_name) {
+      const username = sessionStorage.getItem("username")
+      const formData = new FormData();
+      formData.append('file_name', file_name)
+      formData.append('user', username);
+      formData.append('content', content);
+      formData.append('operation_type', "用户管理");
+      formData.append('project_name', project_name)
+      axios.post('/history/record_user_operation', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data' // 设置请求的 Content-Type
+        }
+      })
+    },
     //所有信息展示
     showMoreInfo(project) {
       this.selectedProject = project;
@@ -410,7 +428,6 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消'
       }).then(({value}) => {
-        //console.log(operationType)
         if (operationType === 'create') {
           this.addProjectForm[valueKey] = value; // 创建操作赋值
         } else if (operationType === 'update') {
@@ -427,13 +444,11 @@ export default {
     //查询所有项目 搜索项目
     async getProjectsList() {
       if (this.queryInfo.query !== "") {
-        // console.log(this.queryInfo.query)
         try {
           const {data: res} = await axios.get(`customerProjects/search?project_name=${this.queryInfo.query}`);
           if (res.code !== 0) {
             return this.$message.error('查询失败，没有此项目')
           }
-          //console.log(res)
           this.projectsList = res.projects
         } catch (error) {
           return this.$message.error('查询失败，没有此项目')
@@ -444,10 +459,8 @@ export default {
           if (res.code !== 0) {
             return this.$message.error('获取项目列表失败')
           }
-          //console.log(res)
           this.projectsList = res.projects
           this.count = res.pagination.count
-          //console.log(this.projectsList)
         } catch (error) {
           return this.$message.error('获取项目列表失败')
         }
@@ -503,7 +516,6 @@ export default {
     },
     // 执行上传逻辑
     async executeUpload() {
-      console.log(this.projectNameToUpload)
       const projectName = this.projectNameToUpload; // 使用项目名称变量
       if (!projectName) {
         console.error("projectName 不存在");
@@ -517,19 +529,19 @@ export default {
       if (this.fileToUpload) {
         formData.append("file", this.fileToUpload);
       }
-      //console.log("File to upload:", this.fileToUpload); // 输出文件信息
+      const fileName = this.fileToUpload.name
       const uploadUrl = `/file/upload`;
       const headers = {
         'Content-Type': 'multipart/form-data' // 设置请求的 Content-Type
       };
-      //console.log(formData.get("file"))
       try {
         const response = await axios.post(uploadUrl, formData, {headers});
         if (response.status === 200) {
           // 上传成功的逻辑
           this.addDialogVisible = false; // 关闭弹窗
+          this.operationHistory("上传了一个文件", projectName, fileName)
         } else {
-          console.log("上传文件失败了")
+          console.log("上传文件失败")
         }
       } catch (error) {
         // 异常处理
@@ -542,8 +554,9 @@ export default {
       try {
         await this.$refs.addProjectRef.validate(); // 表单验证
         this.projectNameToUpload = this.addProjectForm.project_name; // 提取项目名称
+        const project_name = this.projectNameToUpload
         const formData = new FormData();
-        formData.append('project_name', this.addProjectForm.project_name);
+        formData.append('project_name', project_name);
         formData.append('project_base', this.addProjectForm.project_base);
         formData.append('project_num', this.addProjectForm.project_num);
         formData.append('project_owner', this.addProjectForm.project_owner);
@@ -556,7 +569,6 @@ export default {
         formData.append('project_db', this.addProjectForm.project_db);
         formData.append('project_middleware', this.addProjectForm.project_middleware);
 
-        //console.log(formData.get('project_update_user'));
 
         const {data: res} = await axios.post("/customerProjects/create", formData, {
           headers: {
@@ -571,6 +583,7 @@ export default {
         this.$refs.addProjectRef.resetFields(); // 重置表单
         await this.getProjectsList(); // 刷新产品列表
         this.addDialogVisible = false; // 关闭对话框
+        this.operationHistory("创建了一个定制化项目", project_name) //记录操作
       } catch (error) {
         console.error(error)
         this.$message.error("表单验证失败，请检查输入");
@@ -582,7 +595,6 @@ export default {
     async showEditDialog(id) {
       try {
         const response = await axios.get(`customerProjects/search?id=${id}`);
-        console.log(response.data)
         const res = response.data;
         if (res && res.code === 0 && res.projects) {
           this.editDialogVisible = true;
@@ -600,6 +612,7 @@ export default {
       try {
         await this.$refs.editProjectFormRef.validate(); // 表单验证
         this.projectNameToUpload = this.editProjectForm.project_name; // 提取项目名称
+        const project_name = this.projectNameToUpload
         const formData = new FormData();
         formData.append('project_name', this.editProjectForm.project_name);
         formData.append('project_base', this.editProjectForm.project_base);
@@ -626,7 +639,7 @@ export default {
         this.$refs.editProjectFormRef.resetFields(); // 重置表单
         this.editDialogVisible = false; // 关闭对话框
         this.getProjectsList(); // 刷新用户列表
-
+        this.operationHistory("更新了一个定制化项目", project_name)
       } catch (error) {
         this.$message.error("表单验证失败，请检查输入");
       }
@@ -635,12 +648,17 @@ export default {
     //删除项目
     async delete_project(id) {
       try {
+        // 先向服务器请求获取项目的详细信息
+        const response = await axios.get(`customerProjects/search?id=${id}`);
+        const project = response.data; // 获取项目信息，包括名称
+        const project_name = project.projects[0].project_name
         axios.delete(`customerProjects/delete/${id}`)
             .then(response => {
               const res = response.data;
               if (res.code === 0) {
                 this.$message.success('删除项目成功');
                 this.getProjectsList(); // 刷新项目列表
+                this.operationHistory("删除了一个定制化项目", project_name)
               } else {
                 this.$message.error(res.msg || '删除项目失败');
               }

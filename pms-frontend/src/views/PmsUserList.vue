@@ -367,7 +367,6 @@ export default {
         if (res && res.code === 0 && res.users && res.users.length > 0) {
           this.editDialogVisible = true;
           this.editUserForm = res.users[0];
-          //console.log(this.editUserForm);
         } else {
           this.$message.error('未找到用户信息');
         }
@@ -375,6 +374,19 @@ export default {
         console.error(error);
         this.$message.error('获取用户信息失败');
       }
+    },
+    //操作记录
+    operationHistory(content) {
+      const username = sessionStorage.getItem("username")
+      const formData = new FormData();
+      formData.append('user', username);
+      formData.append('content',content);
+      formData.append('operation_type', "用户管理");
+      axios.post('/history/record_user_operation', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data' // 设置请求的 Content-Type
+        }
+      })
     },
     //创建用户
     async createUser() {
@@ -402,6 +414,7 @@ export default {
         this.addDialogVisible = false; // 关闭对话框
         this.$refs.addUserFormRef.resetFields(); // 重置表单
         this.getUserList(); // 刷新用户列表
+        this.operationHistory("创建了一个用户")
       } catch (error) {
         this.$message.error("表单验证失败，请检查输入");
       }
@@ -429,6 +442,7 @@ export default {
           return;
         }
         this.$message.success("更新用户成功");
+        this.operationHistory("修改了用户信息")
         this.editDialogVisible = false; // 关闭对话框
         this.$refs.editUserFormRef.resetFields(); // 重置表单
         this.getUserList(); // 刷新用户列表
@@ -458,6 +472,7 @@ export default {
               const res = response.data;
               if (res.code === 0) {
                 this.$message.success('删除用户成功');
+                this.operationHistory("删除了一个用户")
                 this.getUserList(); // 刷新用户列表
               } else {
                 this.$message.error(res.msg || '删除用户失败');

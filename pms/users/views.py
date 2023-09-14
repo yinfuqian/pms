@@ -14,12 +14,11 @@ def login(request):
     username = receive.get('username')
     password = receive.get('password')
 
-    print(receive)
+    #print(receive)
     user = auth.authenticate(username=username, password=password)
-    print(username, password)
+    #print(username, password)
     if not user:
         return JsonResponse({"code": 1, "msg": "用户密码不匹配", "token": "null"})
-
     """校验通过，删除token"""
     old_token = Token.objects.filter(user=user)
     old_token.delete()
