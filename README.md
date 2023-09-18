@@ -1,9 +1,15 @@
 # 功能说明
 ![img.png](img.png)
 # 代码说明
-· 前端 vue
+· 前端 vue   
 
-· 后端 python3
+npm: 9.5.1
+
+node: 18.16.1
+
+nginx : 1.23.2
+
+· 后端 python3.11 + pip23.2.1 
 
 · 数据库 mysql8
 
@@ -65,3 +71,47 @@ vim  pms/settings.py
 ![img_3.png](img_3.png)
 ![img_4.png](img_4.png)
 
+```shell
+修改前端配置（api配置）
+```
+![img_5.png](img_5.png)
+- 打包前端
+```shell
+npm install  
+npm run build
+```
+- 部署后端应用,迁移数据库
+```shell
+cd pms/pms
+python3 install -r requirement.txt
+python3 manage.py makemigrations
+python3 manage.py migrate
+python3 manage.py runserve server 0.0.0.0:8000
+```
+- 部署前端应用
+```yaml
+version: '3'
+services:
+  nginx:
+    image: docker.io/nginx:1.23.2
+    ports:
+      - 8080:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf/nginx.conf
+      - ./conf.d:/etc/nginx/conf.d/
+      - ./dist:/dist/
+      - /etc/hosts:/etc/hosts
+      - ./log:/var/log/nginx/
+
+    command: ["nginx", "-g", "daemon off;"]
+```
+```shell
+docker-compose up -d
+```
+```shell
+http://xxx.xxx.xxx.xxx:8080
+```
+- 新建默认用户
+```shell
+python3 manage.py createsuperuser
+```
