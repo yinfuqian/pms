@@ -106,7 +106,75 @@ services:
     command: ["nginx", "-g", "daemon off;"]
 ```
 ```shell
-docker-compose up -d
+[root@nginx-pms]# ls -la
+drwxr-xr-x  2 root root    4096 Sep 18 10:30 conf.d
+drwxrwxrwx  3 root root    4096 Sep 14 19:07 dist
+-rw-r--r--  1 root root     317 Sep 18 09:57 docker-compose.yaml
+drwxr-xr-x  2 root root    4096 Sep 14 17:59 log
+-rw-r--r--  1 root root     760 Sep 14 17:59 nginx.conf
+[root@nginx-pms]#
+[root@nginx-pms]# cat conf.d/pms.conf
+server {
+    listen 80;
+    server_name _;
+
+    root /dist;
+    index index.html;
+
+    location /api {
+        if ($request_method !~ ^(GET|POST|PUT)$ ) {
+            return 405;
+        }
+        proxy_pass http://172.16.20.153:8000;
+        #proxy_method POST PUT GET;
+    }
+
+    location / {
+	if ($request_method !~ ^(GET|POST|PUT)$ ) {
+            return 405;
+        }
+        try_files $uri $uri/ /index.html;
+    }
+}
+
+[root@ nginx-pms]# cat nginx.conf
+user root;
+worker_processes  auto;
+
+#error_log  logs/error.log;
+#pid        logs/nginx.pid;
+
+
+events {
+    worker_connections  65535;
+}
+
+
+http {
+    client_max_body_size 100M;
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    log_format custom_format '$remote_addr - $remote_user [$time_local] '
+                             '"$request" $status $body_bytes_sent '
+                             '"$http_referer" "$http_user_agent"'
+			     '$request_time';
+
+    access_log /var/log/nginx/access.log custom_format;
+    error_log  /var/log/nginx/error.log debug;
+
+    types_hash_max_size 2048;
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    sendfile        on;
+    keepalive_timeout  65;
+    include ../conf.d/*.conf;
+
+
+}
+[root@nginx-pms]#
+[root@nginx-pms]# docker-compose up -d
 ```
 ```shell
 http://xxx.xxx.xxx.xxx:8080
