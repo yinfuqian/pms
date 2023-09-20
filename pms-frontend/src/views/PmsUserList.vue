@@ -243,9 +243,9 @@ export default {
     }
     const checkWorknum = (rule, value, callback) => {
       //验证工号的正则表达式
-      const regWorknum = /^\d{5}$/;
+      const regWorknum = /^[a-zA-Z0-9]{5}$/;
       if (regWorknum.test(value)) {
-        return callback(); //合法邮箱
+        return callback(); //合法
       }
       return callback(new Error("请输入合法的工号"));
     }
@@ -326,14 +326,6 @@ export default {
     openAddDialog() {
       this.addDialogVisible = true;
     },
-    //监听switch开关状态的改变
-    // async userStateChange(userinfo) {
-    //   const {data: res} = await axios.put(`update_user/${userinfo.id}`, {mg_state: userinfo.mg_state})
-    //   if (res.code !== 0) {
-    //     return this.$message.error('更新用户状态失败')
-    //   }
-    //   this.$message.success('更新用户状态成功')
-    // },
     // 所有用户查询，搜索用户
     async getUserList() {
       if (this.queryInfo.query !== "") {

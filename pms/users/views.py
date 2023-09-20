@@ -113,7 +113,7 @@ def get_pm(request):
 
 # 查询所有TM
 def get_tm(request):
-    users = PmsUserProfile.objects.filter(userjob="技术经理")
+    users = PmsUserProfile.objects.filter(userjob="TM")
     user_list = []
     for user in users:
         user_list.append({
