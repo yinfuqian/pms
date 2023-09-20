@@ -212,8 +212,8 @@ export default {
       },
       //版本选择
       majorVersions: Array.from({length: 10}, (_, i) => `v${i + 1}`,), // 大版本数组
-      minorVersions: Array.from({length: 99}, (_, i) => `${i + 1}`), // 小版本数组
-      patchVersions: Array.from({length: 99}, (_, i) => `${i + 1}`), // 修订版本数组
+      minorVersions: Array.from({length: 100}, (_, i) => `${i}`), // 小版本数组
+      patchVersions: Array.from({length: 100}, (_, i) => `${i}`), // 修订版本数组
       selectedMajorVersion: '', // 选中的大版本
       selectedMinorVersion: '', // 选中的小版本
       selectedPatchVersion: '', // 选中的修订版本
