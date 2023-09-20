@@ -130,13 +130,21 @@
         </el-select>
       </el-form-item>
       <el-form-item label="更新文档" prop="project_update_file">
-        <el-upload
-            :auto-upload="false"
-            :on-change="handleFileChange"
-            name="file"
-        >
-          <el-button size="small" type="primary">点击上传文件</el-button>
-        </el-upload>
+        <el-tooltip placement="top">
+          <template #content>
+            (1):文件格式为时间+产品+项目+文档名(示例：20230909-bot3.0-华夏卡部署文档.pdf);<br>
+            (2):支持文件类型：.PDF;"
+          </template>
+          <el-upload
+              :auto-upload="false"
+              :on-change="handleFileChange"
+              name="file"
+          >
+            <el-button size="small" type="primary">
+              点击上传文件
+            </el-button>
+          </el-upload>
+        </el-tooltip>
       </el-form-item>
       <el-form-item label="IVC版本" prop="project_ivc"> <!-- prop是验证规则属性 -->
         <el-select v-model="addProjectForm.project_ivc" placeholder="点击选择">
@@ -243,13 +251,21 @@
         </el-select>
       </el-form-item>
       <el-form-item label="文档" prop="project_name"> <!-- prop是验证规则属性 -->
-        <el-upload
-            :auto-upload="false"
-            :on-change="handleFileChange"
-            name="file"
-        >
-          <el-button size="small" type="primary">点击上传文件</el-button>
-        </el-upload>
+        <el-tooltip placement="top">
+          <template #content>
+            (1):文件格式为时间+产品+项目+文档名(示例：20230909-bot3.0-华夏卡部署文档.pdf);<br>
+            (2):支持文件类型：.PDF;"
+          </template>
+          <el-upload
+              :auto-upload="false"
+              :on-change="handleFileChange"
+              name="file"
+          >
+            <el-button size="small" type="primary">
+              点击上传文件
+            </el-button>
+          </el-upload>
+        </el-tooltip>
       </el-form-item>
       <el-form-item label="IVC" prop="project_ivc"> <!-- prop是验证规则属性 -->
         <el-select v-model="editProjectForm.project_ivc" placeholder="点击选择">
@@ -527,26 +543,37 @@ export default {
       formData.append("directory_type", "customers")
       //将文件放入请求体
       if (this.fileToUpload) {
-        formData.append("file", this.fileToUpload);
-      }
-      const fileName = this.fileToUpload.name
-      const uploadUrl = `/file/upload`;
-      const headers = {
-        'Content-Type': 'multipart/form-data' // 设置请求的 Content-Type
-      };
-      try {
-        const response = await axios.post(uploadUrl, formData, {headers});
-        if (response.status === 200) {
-          // 上传成功的逻辑
-          this.addDialogVisible = false; // 关闭弹窗
-          this.operationHistory("上传了一个文件", projectName, fileName)
-        } else {
-          console.log("上传文件失败")
+        const fileName = this.fileToUpload.name;
+        const uploadUrl = `/file/upload`; // 上传接口的URL
+        const chunkSize = 1024 * 1024; // 分块大小，这里设置为1MB，可以根据需求调整
+
+        // 分块上传逻辑
+        let start = 0;
+        while (start < this.fileToUpload.size) {
+          const chunk = this.fileToUpload.slice(start, start + chunkSize);
+          formData.append("file", chunk, fileName); // 指定文件名
+          const headers = {
+            'Content-Type': 'multipart/form-data; charset=UTF-8', // 设置请求的 Content-Type
+          };
+          try {
+            const response = await axios.post(uploadUrl, formData, {headers});
+            if (response.status === 200) {
+              // 上传成功的逻辑
+              console.log(`上传了分块：${start}-${start + chunk.size}`);
+            } else {
+              console.error("上传文件失败了");
+            }
+          } catch (error) {
+            // 异常处理
+            console.error("上传文件出错", error);
+            break; // 如果出现错误，跳出循环
+          }
+
+          start += chunkSize;
         }
-      } catch (error) {
-        // 异常处理
-      } finally {
+
         this.addDialogVisible = false; // 关闭弹窗
+        this.operationHistory("上传了一个文件", projectName, fileName);
       }
     },
     // 创建项目
@@ -568,8 +595,6 @@ export default {
         formData.append('project_ivc', this.addProjectForm.project_ivc);
         formData.append('project_db', this.addProjectForm.project_db);
         formData.append('project_middleware', this.addProjectForm.project_middleware);
-
-
         const {data: res} = await axios.post("/customerProjects/create", formData, {
           headers: {
             'Content-Type': 'multipart/form-data' // 设置请求的 Content-Type
@@ -584,6 +609,12 @@ export default {
         await this.getProjectsList(); // 刷新产品列表
         this.addDialogVisible = false; // 关闭对话框
         this.operationHistory("创建了一个定制化项目", project_name) //记录操作
+        const fileNameRegex = /^(\d{8}-[a-zA-Z]+[\d.]+-[\u4e00-\u9fa5a-zA-Z]+)\.pdf$/;
+        const fileName = this.fileToUpload.name;
+        if (!fileNameRegex.test(fileName)) {
+          this.$message.error(res.message || "文件名不符合标准格式,请从项目修改页面重新上传");
+          return;
+        }
       } catch (error) {
         console.error(error)
         this.$message.error("表单验证失败，请检查输入");
@@ -640,6 +671,13 @@ export default {
         this.editDialogVisible = false; // 关闭对话框
         this.getProjectsList(); // 刷新用户列表
         this.operationHistory("更新了一个定制化项目", project_name)
+        const fileNameRegex = /^(\d{8}-[a-zA-Z]+[\d.]+-[\u4e00-\u9fa5a-zA-Z]+)\.pdf$/;
+        const fileName = this.fileToUpload.name;
+        if (!fileNameRegex.test(fileName)) {
+          console.log(fileName)
+          this.$message.error(res.message || "文件名不符合标准格式,请从项目修改页面重新上传");
+          return;
+        }
       } catch (error) {
         this.$message.error("表单验证失败，请检查输入");
       }
