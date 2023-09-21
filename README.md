@@ -130,7 +130,7 @@ server {
     }
 
     location / {
-	if ($request_method !~ ^(GET|POST|PUT)$ ) {
+	if ($request_method !~ ^(GET|POST|PUT|DELETE)$ ) {
             return 405;
         }
         try_files $uri $uri/ /index.html;

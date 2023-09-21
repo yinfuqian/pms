@@ -1,5 +1,5 @@
 import os
-
+import urllib.parse
 import paramiko
 from django.conf import settings
 from django.http import FileResponse
@@ -57,8 +57,13 @@ def upload_file(request):
                 sftp.stat(target_dir)
             except FileNotFoundError:
                 sftp.mkdir(target_dir)
+            temp_dir = '../tmp/'
+            if not os.path.exists(temp_dir):
+                os.makedirs(temp_dir)
+            # 组合临时文件的完整路径
+            temp_file_path = os.path.join(temp_dir, uploaded_file.name)
             # 保存文件到本地临时目录
-            temp_file_path = f'../tmp/{uploaded_file.name}'
+            #temp_file_path = f'../tmp/{uploaded_file.name}'
             with open(temp_file_path, 'wb') as temp_file:
                 for chunk in uploaded_file.chunks():
                     temp_file.write(chunk)
@@ -139,5 +144,6 @@ def download_file(request):
     response = FileResponse(file_handle)
 
     # 设置Content-Disposition头，指定下载的文件名
-    response['Content-Disposition'] = f'attachment; filename="{file_name}"'
+    encoded_file_name = urllib.parse.quote(file_name)
+    response['Content-Disposition'] = f'attachment; filename="{encoded_file_name}"'
     return response
