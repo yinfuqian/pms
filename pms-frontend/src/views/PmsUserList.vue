@@ -282,9 +282,9 @@ export default {
           trigger: 'blur'
         }],
         usernicname: [{required: false, message: '请输入昵称', trigger: 'blur'}, {
-          min: 3,
+          min: 2,
           max: 20,
-          message: '用户名长度在3~20个字符',
+          message: '用户名长度在2~20个字符',
           trigger: 'blur'
         }],
         userjob: [{required: false, message: '请选择工作岗位', trigger: 'blur'}],
