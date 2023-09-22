@@ -41,7 +41,7 @@ export default {
       rules: {
         username: [
           {required: true, message: "账号不能为空", trigger: 'blur'},
-          {min: 3, max: 10, message: "长度在3到10个字符", trigger: 'blur'}],
+          {min: 3, max: 20, message: "长度在3到20个字符", trigger: 'blur'}],
         password: [
           {required: true, message: "密码不能为空", trigger: 'blur'},
           {min: 6, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur'}]

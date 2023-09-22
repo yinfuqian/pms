@@ -277,8 +277,8 @@ export default {
       addUserFormRules: {
         username: [{required: true, message: '请输入用户名', trigger: 'blur'}, {
           min: 3,
-          max: 15,
-          message: '用户名长度在3~15个字符',
+          max: 20,
+          message: '用户名长度在3~20个字符',
           trigger: 'blur'
         }],
         usernicname: [{required: false, message: '请输入昵称', trigger: 'blur'}, {
@@ -443,8 +443,7 @@ export default {
       }
     },
     // 展示删除用户对话框
-    showDeleteDialog(id)
-    {
+    showDeleteDialog(id) {
       this.$confirm('确认删除该用户嘛？', '提示', {
         confirmButtonText: "确认",
         cancelButtonText: '取消',

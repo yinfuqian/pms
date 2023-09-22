@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
 from .models import PmsUserProfile
+from django.contrib.auth.hashers import make_password
 
 
 @api_view(['POST'])
@@ -18,7 +19,7 @@ def login(request):
     user = auth.authenticate(username=username, password=password)
     #print(username, password)
     if not user:
-        return JsonResponse({"code": 1, "msg": "用户密码不匹配", "token": "null"})
+        return JsonResponse({"code": 1, "msg": "Authentication failed", "token": "null"})
     """校验通过，删除token"""
     old_token = Token.objects.filter(user=user)
     old_token.delete()
@@ -51,7 +52,7 @@ def create_user(request):
     userworknum = reversed.get('userworknum')
     useremail = reversed.get('useremail')
     userphonenum = reversed.get('userphonenum')
-    if reversed.get('usernicname'):
+    if not reversed.get('usernicname'):
         usernicname = PmsUserProfile._meta.get_field('usernicname').get_default()
     try:
         # 检查用户是否已经存在
@@ -183,7 +184,14 @@ def update_user(request, user_id):
 
     reversed = request.data
     username = reversed.get('username')
-    password = reversed.get('password')
+    # 检查密码是否为空，如果为空则设置默认密码
+    if 'password' in reversed and reversed['password']:
+        password = make_password(reversed['password'])
+    else:
+        password = make_password("zhuiyi@666")
+    #password = reversed.get('password') or "zhuiyi@666"
+    #print(reversed.get('password'))
+    print(password)
     usernicname = reversed.get('usernicname')
     userjob = reversed.get('userjob')
     userbase = reversed.get('userbase')
@@ -192,8 +200,7 @@ def update_user(request, user_id):
     userphonenum = reversed.get('userphonenum')
     if reversed.get('username'):
         user.username = username
-    if reversed.get('password'):
-        user.set_password(password)
+    user.password = password
     if reversed.get('usernicname'):
         user.usernicname = usernicname
     if reversed.get('userjob'):
