@@ -44,8 +44,11 @@ def check_token(request):
 # 创建用户
 def create_user(request):
     reversed = request.POST
+    password = reversed.get('password')
+    print(password)
+    if password is None or password == 'undefined':
+        password = "zhuiyi@666"  # 设置默认密码
     username = reversed.get('username')
-    password = reversed.get('password') or 'zhuiyi@666'
     usernicname = reversed.get('usernicname')
     userjob = reversed.get('userjob')
     userbase = reversed.get('userbase')
@@ -66,8 +69,6 @@ def create_user(request):
     except Exception as e:
         print(e)
         return JsonResponse({"code": 1, "msg": "用户创建失败"})
-
-
 @api_view(['GET'])
 # 根据条件查询用户
 def search_user(request):
@@ -189,9 +190,6 @@ def update_user(request, user_id):
         password = make_password(reversed['password'])
     else:
         password = make_password("zhuiyi@666")
-    #password = reversed.get('password') or "zhuiyi@666"
-    #print(reversed.get('password'))
-    print(password)
     usernicname = reversed.get('usernicname')
     userjob = reversed.get('userjob')
     userbase = reversed.get('userbase')
