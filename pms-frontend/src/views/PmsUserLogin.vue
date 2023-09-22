@@ -11,7 +11,7 @@
               <el-input v-model="loginForm.username" placeholder="用户名" prefix-icon="User"></el-input>
             </el-form-item>
             <el-form-item prop="password"> <!-- 密码 -->
-              <el-input v-model="loginForm.password" placeholder="密码" prefix-icon="Lock"></el-input>
+              <el-input v-model="loginForm.password" placeholder="密码" prefix-icon="Lock" show-password></el-input>
             </el-form-item>
             <el-form-item> <!-- 按钮 -->
               <el-button style="margin-top: 0px;width: 100%;" type="primary" @click="submitLoginForm">登录</el-button>
